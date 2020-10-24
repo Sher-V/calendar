@@ -1,0 +1,31 @@
+.day {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  color: #70757a;
+
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 24px;
+    border-left: 2px solid #dadce0;
+    display: block;
+  }
+}
+
+.date {
+  font-size: 26px;
+  line-height: 46px;
+  text-indent: -2.6px;
+  letter-spacing: -2.6px;
+}
+
+.name {
+  font-size: 14px;
+  line-height: 32px;
+  font-weight: 500;
+  text-indent: 0.8px;
+  letter-spacing: 0.8px;
+}

@@ -1,0 +1,8 @@
+query Events {
+    events {
+        id
+        title
+        toDate
+        fromDate
+    }
+}

@@ -1,0 +1,19 @@
+.content {
+  display: flex;
+}
+
+.days {
+  flex: 7;
+}
+
+.hours {
+  display: flex;
+}
+
+.hour {
+  height: 50px;
+  flex: 1;
+  border-top: 1px solid #dadce0;
+  border-left: 1px solid #dadce0;
+  position: relative;
+}
