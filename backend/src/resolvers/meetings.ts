@@ -49,45 +49,6 @@ export class Meeting {
     return true;
   }
 
-  /*@Mutation(() => Boolean)
-    async createEvent(
-        @Arg("fromDate") fromDate: Date,
-        @Arg("toDate") toDate: Date,
-        @Arg("title", { nullable: true }) title?: string
-    ): Promise<boolean> {
-        try {
-            await MeetingEntity.create({
-                title,
-                fromDate,
-                toDate,
-            }).save();
-        } catch (e) {
-            console.log(e);
-            return false;
-        }
-        return true;
-    }
-
-    @Mutation(() => Boolean)
-    async editEvent(
-        @Arg("id") id: string,
-        @Arg("title", { nullable: true }) title?: string,
-        @Arg("fromDate", { nullable: true }) fromDate?: Date,
-        @Arg("toDate", { nullable: true }) toDate?: Date
-    ): Promise<boolean> {
-        const event = await MeetingEntity.findOne(id);
-
-        if (!event) return false;
-
-        event.title = title || event.title;
-        event.fromDate = fromDate || event.fromDate;
-        event.toDate = toDate || event.toDate;
-
-        await event.save();
-
-        return true;
-    }*/
-
   @Mutation(() => Boolean)
   async deleteMeeting(@Arg("id",  () => Int) id: number): Promise<boolean> {
     try {
