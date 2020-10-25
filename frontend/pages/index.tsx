@@ -32,7 +32,7 @@ const Index = () => {
     initialState
   );
 
-  // to handle clicks on editor
+  // handling clicks on editor
   const editorRef = useRef<HTMLDivElement>();
 
   const handleClickOutside = (event: React.MouseEvent<Document>) => {

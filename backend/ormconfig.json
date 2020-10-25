@@ -4,6 +4,5 @@
   "port": 5432,
   "database": "calendar",
   "entities": ["dist/entities/*.js"],
-  "synchronize": true,
-  "dropSchema": true
+  "synchronize": true
 }
