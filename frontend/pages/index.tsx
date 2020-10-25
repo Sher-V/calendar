@@ -1,7 +1,7 @@
-import React, { useReducer, useRef } from "react";
+import React, { useCallback, useReducer, useRef } from "react";
 import Container from "@material-ui/core/Container";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Box from "@material-ui/core/Box";
-import { useEventsQuery } from "../generated/graphql";
 import { ClickAwayListener } from "@material-ui/core";
 import Days from "../components/days/days";
 import Hours from "../components/hours/hours";
@@ -10,28 +10,37 @@ import Meeting from "../components/meeting/meeting";
 import styles from "./index.module.scss";
 import reducer, { initialState } from "../utils/home/reducer";
 import {
-  remove,
-  setAnchor,
-  setMeetings,
-  setOpened,
-  setPastMeetings,
+  closeEditor,
+  openEditor,
+  setOpenedMeeting,
   setTitle,
-  undo,
 } from "../utils/home/actions";
 import { DayOfWeekType } from "../utils/home/types";
+import {
+  useDeleteMeetingMutation,
+  useMeetingsQuery,
+  useSaveMeetingMutation,
+} from "../generated/graphql";
 
 const Index = () => {
-  const { data, loading, error } = useEventsQuery();
-  const [{ meetings, anchor, title, openedMeeting }, dispatch] = useReducer(
+  const { data, loading, error, refetch } = useMeetingsQuery();
+  const [saveMeeting] = useSaveMeetingMutation();
+  const [deleteMeeting] = useDeleteMeetingMutation();
+
+  const [{ anchor, title, openedMeeting }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
+  // to handle clicks on editor
   const editorRef = useRef<HTMLDivElement>();
 
   const handleClickOutside = (event: React.MouseEvent<Document>) => {
-    if (editorRef.current && !editorRef.current.contains(event.target as Node))
-      closeEditor();
+    if (editorRef.current) {
+      if (!editorRef.current.contains(event.target as Node))
+        dispatch(closeEditor());
+      else dispatch(setOpenedMeeting({ ...openedMeeting, title }));
+    }
   };
 
   const createMeeting = (event: any) => {
@@ -39,75 +48,56 @@ const Index = () => {
 
     if (data) {
       if (!!openedMeeting) {
-        closeEditor();
+        dispatch(closeEditor());
         return;
       }
     } else return;
 
-    const [day, hour]: [DayOfWeekType, number] = data
-      .split(" ")
-      .map(Number);
+    const [day, hour]: [DayOfWeekType, number] = data.split(" ").map(Number);
 
-    openEditor(event, day, hour);
-    dispatch(setPastMeetings(meetings));
-    dispatch(
-      setMeetings({
-        ...meetings,
-        [day]: [...meetings[day], { title: "", hour }],
-      })
-    );
+    dispatch(openEditor(event, { day, hour, title: "" }));
   };
 
-  const openEditor = (
-    event: React.MouseEvent<HTMLDivElement>,
-    day: DayOfWeekType,
-    hour: number
-  ) => {
-    if (!!openedMeeting) return;
-
-    const meeting = meetings[day].find((meeting) => meeting.hour === hour);
-
-    dispatch(setOpened({ day, hour }));
-    dispatch(setTitle(meeting?.title || ""));
-    dispatch(setAnchor(event.target as HTMLDivElement));
+  const onSave = async () => {
+    await saveMeeting({
+      variables: { ...openedMeeting, title },
+    });
+    await refetch();
+    dispatch(closeEditor());
   };
 
-  const closeEditor = () => {
-    dispatch(setOpened(null));
-    dispatch(setTitle(""));
-    dispatch(undo());
+  const onDelete = async () => {
+    await deleteMeeting({
+      variables: { id: openedMeeting.id },
+    });
+    await refetch();
+    dispatch(closeEditor());
   };
 
-  const save = () => {
-    dispatch(
-      setMeetings({
-        ...meetings,
-        [openedMeeting.day]: meetings[openedMeeting.day].map((meeting) => {
-          if (meeting.hour === openedMeeting.hour) return { ...meeting, title };
-          return meeting;
-        }),
-      })
-    );
-    dispatch(setPastMeetings(null));
-    dispatch(setTitle(""));
-    dispatch(setOpened(null));
-  };
-
-  const renderMeetings = (hour: number, day: number) => {
-    const meeting = meetings[day].find((meeting) => meeting.hour === hour);
-
-    if (meeting)
-      return (
-        <Meeting
-          onOpen={openEditor}
-          title={meeting.title}
-          day={day}
-          hour={hour}
-        />
+  const onOpen = useCallback(
+    (
+      event: React.MouseEvent<HTMLDivElement>,
+      day: DayOfWeekType,
+      hour: number
+    ) => {
+      const meeting = data.meetings[day].find(
+        (meeting) => meeting.hour === hour
       );
+      dispatch(openEditor(event, { ...meeting, day }));
+    },
+    [data]
+  );
 
-    return null;
-  };
+  const onClose = () => dispatch(closeEditor());
+
+  if (loading) return <CircularProgress className={styles.loader} />;
+
+  if (error)
+    return (
+      <Box display="flex" width={"100%"} height={1000}>
+        <Box m={"auto"}>An error occurred. Please try again.</Box>
+      </Box>
+    );
 
   return (
     <Container>
@@ -119,14 +109,20 @@ const Index = () => {
             <div className={styles.days}>
               {Array.from({ length: 24 }, (_, hour) => (
                 <div className={styles.hours} key={hour}>
-                  {Array.from({ length: 7 }, (__, day) => (
+                  {Array.from({ length: 7 }, (__, day: DayOfWeekType) => (
                     <div
                       className={styles.hour}
                       key={`${day} ${hour}`}
                       data-id={`${day} ${hour}`}
                       onClick={createMeeting}
                     >
-                      {renderMeetings(hour, day)}
+                      <Meeting
+                        hour={hour}
+                        openedMeeting={openedMeeting}
+                        meetingsByDay={data.meetings[day]}
+                        day={day}
+                        onOpen={onOpen}
+                      />
                     </div>
                   ))}
                 </div>
@@ -135,14 +131,15 @@ const Index = () => {
           </ClickAwayListener>
         </div>
         <Editor
-          remove={() => dispatch(remove())}
-          save={save}
+          remove={onDelete}
+          save={onSave}
+          openedMeeting={openedMeeting}
           title={title}
           setTitle={(title) => dispatch(setTitle(title))}
           ref={editorRef}
           anchor={anchor}
           isOpen={!!openedMeeting}
-          onClose={closeEditor}
+          onClose={onClose}
         />
       </Box>
     </Container>

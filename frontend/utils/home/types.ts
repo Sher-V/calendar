@@ -1,79 +1,60 @@
 export enum ActionTypes {
-  SET_OPENED = "SET_OPENED",
   SET_TITLE = "SET_TITLE",
-  SET_PAST_MEETINGS = "SET_PAST_MEETINGS",
-  SET_MEETINGS = "SET_MEETINGS",
-  SET_ANCHOR = "SET_ANCHOR",
-  UNDO = "UNDO",
-  REMOVE = "REMOVE",
+  CLOSE_EDITOR = "CLOSE_EDITOR",
+  OPEN_EDITOR = "OPEN_EDITOR",
+  SET_OPENED_MEETING = "SET_OPENED_MEETING",
 }
 
 // state
 export type State = Readonly<{
-  meetings: MeetingsWeekType;
-  pastMeetings: MeetingsWeekType;
   anchor: HTMLDivElement | null;
   title: string;
   openedMeeting: OpenedMeetingType;
 }>;
 
-export type DayOfWeekType = 0 | 1 | 2 | 3 | 4 | 5 | 6
+export type DayOfWeekType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type MeetingsWeekType = {
   [key in DayOfWeekType]: MeetingType[];
 };
 
 export type MeetingType = {
+  id: number;
   hour: number;
   title: string;
 };
 
 export type OpenedMeetingType = {
+  id?: number;
+  title: string;
   day: DayOfWeekType;
   hour: number;
 };
 
 // actions
-type SetOpenedAction = {
-  type: ActionTypes.SET_OPENED;
-  value: {
-    day: DayOfWeekType;
-    hour: number;
-  };
-};
 
 type SetTitleAction = {
   type: ActionTypes.SET_TITLE;
   title: string;
 };
 
-type SetMeetingsAction = {
-  type: ActionTypes.SET_MEETINGS;
-  meetings: MeetingsWeekType;
-};
-
-type SetPastMeetingsAction = {
-  type: ActionTypes.SET_PAST_MEETINGS;
-  meetings: MeetingsWeekType;
-};
-
-type SetAnchorAction = {
-  type: ActionTypes.SET_ANCHOR;
+type OpenEditorAction = {
+  type: ActionTypes.OPEN_EDITOR;
   target: HTMLDivElement;
+  meeting: OpenedMeetingType;
 };
 
-type UndoAction = {
-  type: ActionTypes.UNDO;
+type CloseEditorAction = {
+  type: ActionTypes.CLOSE_EDITOR;
 };
 
-type RemoveAction = {
-  type: ActionTypes.REMOVE
-}
+type SetOpenedMeetingAction = {
+  type: ActionTypes.SET_OPENED_MEETING;
+  meeting: OpenedMeetingType;
+};
 
 export type Actions =
-  | SetOpenedAction
   | SetTitleAction
-  | SetMeetingsAction
-  | SetPastMeetingsAction
-  | SetAnchorAction
-  | UndoAction | RemoveAction;
+  | OpenEditorAction
+  | CloseEditorAction
+  | SetOpenedMeetingAction;

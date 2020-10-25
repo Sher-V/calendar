@@ -3,7 +3,7 @@ import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
-import { Event } from "./resolvers/event";
+import {Meeting} from "./resolvers/meetings";
 
 const PORT = process.env.PORT || 8080;
 
@@ -14,7 +14,8 @@ const PORT = process.env.PORT || 8080;
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [Event],
+
+      resolvers: [Meeting],
       validate: false
     }),
   });

@@ -1,0 +1,3 @@
+mutation SaveMeeting($id: Int $title: String! $day: Int! $hour: Int!) {
+    saveMeeting(id: $id title: $title day: $day hour: $hour)
+}

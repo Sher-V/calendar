@@ -1,29 +1,35 @@
 import React from "react";
-import styles from "./index.module.scss";
+import { isEqual } from "lodash";
 import { Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import {
+  DayOfWeekType,
+  MeetingType,
+  OpenedMeetingType,
+} from "../../utils/home/types";
 
 interface Props {
   hour: number;
-  title: string;
-  day?: number;
-  onOpen?: (
+  meetingsByDay: MeetingType[];
+  day: DayOfWeekType;
+  openedMeeting: OpenedMeetingType;
+  onOpen: (
     event: React.MouseEvent<HTMLDivElement>,
-    day: number,
+    day: DayOfWeekType,
     hour: number
   ) => void;
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles( theme =>({
   root: {
     height: "100%",
-    backgroundColor: "rgb(3, 155, 229)",
-    color: "#fff",
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
     fontSize: "16px",
-    fontWeight: 500,
-    paddingLeft: "5px",
+    fontWeight: theme.typography.fontWeightMedium,
+    paddingLeft: theme.spacing(1),
   },
-});
+}));
 
 const getHour = (hour: number) => {
   switch (true) {
@@ -38,20 +44,32 @@ const getHour = (hour: number) => {
   }
 };
 
-const Meeting: React.FC<Props> = ({ hour, title, onOpen, day }) => {
-  const classes = useStyles();
+const Meeting = React.memo<Props>(
+  ({ hour, meetingsByDay, onOpen, day, openedMeeting }) => {
+    let meeting;
 
-  return (
-    <Paper
-      onClick={(event) => onOpen(event, day, hour)}
-      classes={{ root: classes.root }}
-    >
-      <div>{(!!title && title) || "(no title)"}</div>
-      <div>
-        {getHour(hour)}-{getHour(hour + 1)}
-      </div>
-    </Paper>
-  );
-};
+    if (openedMeeting?.day === day && openedMeeting?.hour === hour) {
+      meeting = openedMeeting;
+    } else meeting = meetingsByDay.find((meeting) => meeting.hour === hour);
+
+
+    if (!meeting) return null;
+
+    const classes = useStyles();
+
+    return (
+      <Paper
+        onClick={(event) => onOpen(event, day, hour)}
+        classes={{ root: classes.root }}
+      >
+        <div>{(!!meeting.title && meeting.title) || "(no title)"}</div>
+        <div>
+          {getHour(hour)}-{getHour(hour + 1)}
+        </div>
+      </Paper>
+    );
+  },
+  (oldProps, nextProps) => isEqual(oldProps, nextProps)
+);
 
 export default Meeting;

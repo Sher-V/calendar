@@ -1,4 +1,11 @@
-import {Actions, ActionTypes, DayOfWeekType, MeetingsWeekType} from "./types";
+import {
+  Actions,
+  ActionTypes,
+  DayOfWeekType,
+  MeetingsWeekType,
+  OpenedMeetingType,
+} from "./types";
+import React from "react";
 
 export const setTitle = (title: string): Actions => ({
   type: ActionTypes.SET_TITLE,
@@ -17,22 +24,24 @@ export const setOpened = (
   value,
 });
 
-export const setMeetings = (meetings: MeetingsWeekType): Actions => ({
-  type: ActionTypes.SET_MEETINGS,
-  meetings,
-});
-
-export const setPastMeetings = (
-  meetings: MeetingsWeekType | null
-): Actions => ({
-  type: ActionTypes.SET_PAST_MEETINGS,
-  meetings,
-});
-
-export const undo = (): Actions => ({
-  type: ActionTypes.UNDO,
-});
-
 export const remove = (): Actions => ({
   type: ActionTypes.REMOVE,
+});
+
+export const openEditor = (
+  event: React.MouseEvent<HTMLDivElement>,
+  meeting: OpenedMeetingType
+): Actions => ({
+  type: ActionTypes.OPEN_EDITOR,
+  target: event.target as HTMLDivElement,
+  meeting,
+});
+
+export const closeEditor = (): Actions => ({
+  type: ActionTypes.CLOSE_EDITOR,
+});
+
+export const setOpenedMeeting = (meeting: OpenedMeetingType): Actions => ({
+  type: ActionTypes.SET_OPENED_MEETING,
+  meeting,
 });

@@ -13,7 +13,7 @@ const createApolloClient = () =>
         cache: new InMemoryCache({
             addTypename: false
         }),
-        uri: "http://localhost:8080/graphql"
+        uri: "http://localhost:8080/graphql",
     });
 
 export const initializeApollo = (initialState = null) => {

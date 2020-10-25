@@ -1,0 +1,7 @@
+query Meetings {
+  meetings {
+    id
+    hour
+    title
+  }
+}

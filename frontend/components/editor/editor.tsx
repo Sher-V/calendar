@@ -9,6 +9,7 @@ import Button from "@material-ui/core/Button";
 import CloseIcon from "@material-ui/icons/Close";
 import styles from "./index.module.scss";
 import { makeStyles } from "@material-ui/core/styles";
+import { OpenedMeetingType } from "../../utils/home/types";
 
 interface Props {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface Props {
   setTitle: (title: string) => void;
   save: () => void;
   remove: () => void;
+  openedMeeting: OpenedMeetingType;
 }
 
 const useStyles = makeStyles({
@@ -27,7 +29,10 @@ const useStyles = makeStyles({
 });
 
 const Editor = React.forwardRef<HTMLDivElement, Props>(
-  ({ isOpen, anchor, onClose, title, setTitle, save, remove }, ref) => {
+  (
+    { isOpen, openedMeeting, anchor, onClose, title, setTitle, save, remove },
+    ref
+  ) => {
     const classes = useStyles();
 
     return (
@@ -51,18 +56,23 @@ const Editor = React.forwardRef<HTMLDivElement, Props>(
           </div>
           <CardContent>
             <TextField
+              autoFocus
               value={title}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 setTitle(event.currentTarget.value)
               }
               label={"Title"}
               placeholder={"Add title"}
+              helperText={"Max length is 30 symbols"}
+              inputProps={{ maxLength: 30 }}
             />
           </CardContent>
           <CardActions>
-            <Button onClick={remove} classes={{ root: classes.root }}>
-              Remove
-            </Button>
+            {openedMeeting?.id && (
+              <Button onClick={remove} classes={{ root: classes.root }}>
+                Remove
+              </Button>
+            )}
             <Button onClick={save} classes={{ root: classes.root }}>
               Save
             </Button>
